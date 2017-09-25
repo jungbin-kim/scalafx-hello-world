@@ -27,49 +27,57 @@
 
 package hello
 
+
 import scalafx.application.JFXApp
 import scalafx.application.JFXApp.PrimaryStage
-import scalafx.geometry.Insets
-import scalafx.scene.Scene
-import scalafx.scene.effect.DropShadow
-import scalafx.scene.layout.HBox
+import scalafx.scene.{Group, PerspectiveCamera, PointLight, Scene}
+import scalafx.scene.image.Image
 import scalafx.scene.paint.Color._
 import scalafx.scene.paint._
-import scalafx.scene.text.Text
+import scalafx.scene.shape.Cylinder
+import scalafx.scene.transform.Rotate
 
 object ScalaFXHelloWorld extends JFXApp {
 
+  val cylinderImage = new Image("file:images.png")
+  val imageWidth = cylinderImage.getWidth
+  val imageHeight = cylinderImage.getHeight
+  val cylinderRadius = (imageWidth / (2 * Math.PI)).toInt
+
   stage = new PrimaryStage {
     //    initStyle(StageStyle.Unified)
-    title = "ScalaFX Hello World"
+    title = "ScalaFX 3D Scene"
     scene = new Scene {
-      fill = Color.rgb(38, 38, 38)
-      content = new HBox {
-        padding = Insets(50, 80, 50, 80)
-        children = Seq(
-          new Text {
-            text = "Scala"
-            style = "-fx-font: normal bold 100pt sans-serif"
-            fill = new LinearGradient(
-              endX = 0,
-              stops = Stops(Red, DarkRed))
-          },
-          new Text {
-            text = "FX"
-            style = "-fx-font: italic bold 100pt sans-serif"
-            fill = new LinearGradient(
-              endX = 0,
-              stops = Stops(White, DarkGray)
-            )
-            effect = new DropShadow {
-              color = DarkGray
-              radius = 15
-              spread = 0.25
-            }
-          }
-        )
-      }
-    }
 
+      val cylinder = new Cylinder(cylinderRadius, imageHeight) {
+        material = new PhongMaterial {
+          specularColor = White
+          diffuseMap = cylinderImage
+        }
+      }
+
+      // Put shapes in a groups so they can be rotated together
+      val shapes = new Group(cylinder)
+
+      val light = new PointLight {
+        color = Color.AntiqueWhite
+        translateX = -265
+        translateY = -260
+        translateZ = -625
+      }
+
+      root = new Group {
+        // Put light outside of `shapes` group so it does not rotate
+        children = new Group(shapes, light)
+        translateX = 250
+        translateY = 250
+        translateZ = 825
+        rotationAxis = Rotate.YAxis
+      }
+
+      camera = new PerspectiveCamera(false)
+
+    }
   }
+
 }
